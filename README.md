@@ -1,6 +1,6 @@
 # WebSpeedReader
 ![總結](./images/總結DEMO.gif)
-Web Speed Reader 中文為"網頁快速閱讀助手"，是一款 Chrome 擴充套件支持  groq 上的 mixtral-8x7b-32768 的 AI 總結工具
+Web Speed Reader 中文為"網頁快速閱讀助手"，是一款 Chrome 擴充套件支持  groq 上的 openai/gpt-oss-120b 的 AI 總結工具
 
 # 安裝
 1. 在 Chrome 瀏覽器中，轉到 chrome://extensions
