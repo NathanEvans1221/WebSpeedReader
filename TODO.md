@@ -18,7 +18,7 @@
 - [x] **精確內容提取 (Smart Extraction)**: 整合 `Readability.js` (Mozilla) 以過濾網頁雜訊，提升總結品質。
 - [x] **Markdown 渲染**: 引入 `marked.min.js` 將 AI 回傳的總結轉化為美觀的 HTML。
 - [x] **一鍵複製**: 新增複製原始 Markdown 內容的功能並提供 UI 回饋.
-- [x] **API Key 安全與佈局**: 將 Key 輸入與模型設定移至「進階設定」折疊選單，優化視覺體驗。
+- [x] **API Key 安全與佈局**: 將 Key 輸入與模型設定整合至頂部的「進階設定」折疊選單，優化視覺體驗。
 - [x] **基礎多語言**: 支援繁體中文與英文切換。
 - [x] **專案規範文件**: 建立 `GEMINI.md` 與 `CHANGELOG.md`。
 - [x] **載入狀態美化**: 加入 Loading 動畫與打字機光標效果，提升互動感。

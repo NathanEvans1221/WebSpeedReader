@@ -519,8 +519,7 @@ select:hover {
 
 /* 進階設定面板樣式 */
 details#advanced-settings {
-  background-color: var(--card-bg);
-  /* 使用卡片背景色 */
+  background-color: var(--select-bg);
   border-radius: 4px;
   transition: all 0.3s ease;
   margin-top: 20px;

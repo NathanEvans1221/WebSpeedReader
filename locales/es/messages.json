@@ -1,0 +1,41 @@
+{
+    "ui": {
+        "summarize": "Resumir",
+        "copy": "Copiar",
+        "history": "Hist.",
+        "clear": "Borrar",
+        "message": "Haga clic en \"Resumir\" para comenzar.",
+        "loading": "Pensando...",
+        "historyTitle": "Resúmenes recientes",
+        "promptPlaceholder": "Introduzca su instrucción...",
+        "copied": "Copiado",
+        "delete": "Borrar"
+    },
+    "styles": [
+        "Normal",
+        "Conciso",
+        "Detallado",
+        "Personalizado"
+    ],
+    "alerts": {
+        "alertKey": "Configure primero la clave API groq",
+        "keySaved": "Clave API guardada",
+        "noExportHistory": "No hay historial para exportar",
+        "confirmClear": "¿Seguro que quieres borrar todo el historial?",
+        "noHistory": "Todavía no hay historial"
+    },
+    "errors": {
+        "summarizeError": "Ocurrió un error durante el resumen"
+    },
+    "stats": {
+        "expanded": "📝 Contenido expandido ({original} → {summary} caracteres)",
+        "saved": "⚡️ Ahorrado {percent}% de lectura ({original} → {summary} caracteres)"
+    },
+    "prompts": {
+        "languagePrefix": "Por favor, resuma el siguiente contenido en español:\n\n",
+        "defaultCustom": "Please summarize the following content:\n\n",
+        "normal": "Use el \"Modo Normal\", proporcionando una visión general y detalles importantes.\n\n",
+        "concise": "Use el \"Modo Conciso\", proporcionando solo 3 puntos clave (con viñetas).\n\n",
+        "detailed": "Use el \"Modo Detallado\", incluyendo antecedentes detallados, argumentos centrales, detalles específicos y conclusiones, con encabezados claros.\n\n"
+    }
+}

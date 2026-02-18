@@ -1,0 +1,54 @@
+{
+    "ui": {
+        "summarize": "總結",
+        "copy": "複製",
+        "history": "歷史",
+        "clear": "清除",
+        "message": "請點擊\"總結\"按鈕開始總結當前頁面內容。",
+        "loading": "正在思考...",
+        "historyTitle": "最近總結",
+        "promptPlaceholder": "請輸入您的總結指令 (Prompt)...",
+        "copied": "已複製！",
+        "delete": "刪除",
+        "advancedSettings": "⛙️ 進階設定",
+        "themeToggle": "切換主題",
+        "customTextColor": "自定義字體顏色",
+        "customBgColor": "自定義背景色",
+        "copyMarkdown": "複製 Markdown",
+        "readAloud": "朗讀總結",
+        "exportHistory": "匯出總結 (JSON)",
+        "clearHistory": "清空紀錄",
+        "save": "保存",
+        "aiModel": "AI 模型:",
+        "apiKey": "API Key:",
+        "maxTokens": "Max Tokens:",
+        "maxTokensPlaceholder": "預設 (例如 2048)"
+    },
+    "styles": [
+        "標準摘要",
+        "簡明模式",
+        "深度解析",
+        "自定義指令"
+    ],
+    "alerts": {
+        "alertKey": "請先設置 groq API Key",
+        "keySaved": "groq API Key 已保存",
+        "noExportHistory": "尚無紀錄可匯出",
+        "confirmClear": "確定要清空所有歷史紀錄嗎？",
+        "noHistory": "尚無歷史紀錄"
+    },
+    "errors": {
+        "summarizeError": "總結時發生錯誤"
+    },
+    "stats": {
+        "expanded": "📝 內容擴展了 (原 {original} → 現 {summary} 字)",
+        "saved": "⚡️ 節省了 {percent}% 的閱讀量 ({original} → {summary} 字)"
+    },
+    "prompts": {
+        "languagePrefix": "請用繁體中文總結以下內容：\n\n",
+        "defaultCustom": "請總結以下內容：\n\n",
+        "normal": "請以「標準摘要」模式總結，提供整體的概要與重要細節。\n\n",
+        "concise": "請以「簡明模式」總結，只提供 3 個核心重點（使用 bullet points）。\n\n",
+        "detailed": "請以「深度解析」模式總結，包含詳細的背景、核心觀點、具體細節與結論，並使用適當的標題。\n\n"
+    }
+}

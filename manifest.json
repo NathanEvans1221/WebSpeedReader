@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "網頁快速閱讀助手",
-  "version": "1.0.0.23",
+  "version": "1.0.0.27",
   "description": "幫助用戶快速總結和閱讀網頁內容",
   "permissions": [
     "activeTab",
@@ -33,6 +33,16 @@
       "js": [
         "readability.js",
         "content.js"
+      ]
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "locales/*/messages.json"
+      ],
+      "matches": [
+        "<all_urls>"
       ]
     }
   ]

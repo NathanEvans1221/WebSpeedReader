@@ -1,0 +1,54 @@
+{
+    "ui": {
+        "summarize": "要約",
+        "copy": "複製",
+        "history": "履歴",
+        "clear": "消去",
+        "message": "「要約」ボタンをクリックして開始します。",
+        "loading": "思考中...",
+        "historyTitle": "最近の要約",
+        "promptPlaceholder": "要約の指示を入力してください...",
+        "copied": "複製完了",
+        "delete": "削除",
+        "advancedSettings": "⚙️ 詳細設定",
+        "themeToggle": "テーマ切替",
+        "customTextColor": "テキスト色のカスタマイズ",
+        "customBgColor": "背景色のカスタマイズ",
+        "copyMarkdown": "Markdown をコピー",
+        "readAloud": "音声読み上げ",
+        "exportHistory": "履歴をエクスポート (JSON)",
+        "clearHistory": "履歴をクリア",
+        "save": "保存",
+        "aiModel": "AI モデル:",
+        "apiKey": "API キー:",
+        "maxTokens": "最大トークン数:",
+        "maxTokensPlaceholder": "デフォルト (例: 2048)"
+    },
+    "styles": [
+        "標準",
+        "簡潔",
+        "詳細",
+        "カスタム指令"
+    ],
+    "alerts": {
+        "alertKey": "groq APIキーを設定してください",
+        "keySaved": "APIキーが保存されました",
+        "noExportHistory": "エクスポートする履歴がありません",
+        "confirmClear": "履歴をすべて消去してもよろしいですか？",
+        "noHistory": "履歴はまだありません"
+    },
+    "errors": {
+        "summarizeError": "要約中にエラーが発生しました"
+    },
+    "stats": {
+        "expanded": "📝 内容が拡張されました (元 {original} → 現 {summary} 文字)",
+        "saved": "⚡️ 読書量を {percent}% 節約しました ({original} → {summary} 文字)"
+    },
+    "prompts": {
+        "languagePrefix": "以下の内容を日本語で要約してください:\n\n",
+        "defaultCustom": "Please summarize the following content:\n\n",
+        "normal": "「標準モード」を使用し、全体的な概要と重要な詳細を提供してください。\n\n",
+        "concise": "「簡潔モード」を使用し、3つの重要なポイントのみを箇条書きで提供してください。\n\n",
+        "detailed": "「詳細モード」を使用し、詳細な背景、核心的な議論、具体的な詳細、結論を含め、明確な見出しで分類してください。\n\n"
+    }
+}

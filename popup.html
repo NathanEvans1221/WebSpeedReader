@@ -59,39 +59,10 @@
         <button id="clear-summary-btn" class="btn">清除</button>
       </div>
     </div>
-    <!-- 歷史紀錄面版 -->
-    <div id="history-panel" class="hidden">
-      <div class="history-header">
-        <span id="history-title">最近總結</span>
-        <div class="history-actions">
-          <button id="export-history" class="btn-icon-small" title="匯出總結 (JSON)">📥</button>
-          <button id="clear-history" class="btn-icon-small" title="清空紀錄">🗑️</button>
-          <button id="close-history" class="btn-small">✕</button>
-        </div>
-      </div>
-      <div id="history-list"></div>
-    </div>
-
-    <!-- 提示訊息區域 -->
-    <div id="message">請點擊"總結"按鈕開始總結當前頁面內容。</div>
-
-
-
-    <!-- 總結結果顯示區域 -->
-    <div id="summary"></div>
-    <!-- 統計資訊區域 -->
-    <div id="stats" class="hidden">
-      <span id="stats-text"></span>
-    </div>
-    <!-- 載入動畫區域 -->
-    <div id="loading" class="hidden">
-      <div class="spinner"></div>
-      <span id="loading-text">正在思考...</span>
-    </div>
 
     <!-- 進階設定區域 -->
     <details id="advanced-settings"
-      style="margin-top: 15px; border-top: 1px solid var(--border-color); padding-top: 10px;">
+      style="margin-top: 5px; margin-bottom: 15px; border-top: 1px solid var(--border-color); padding-top: 10px;">
       <summary id="advanced-summary"
         style="cursor: pointer; font-size: 12px; color: var(--text-color); user-select: none;">⚙️ 進階設定 / Advanced
       </summary>
@@ -131,6 +102,37 @@
         </div>
       </div>
     </details>
+    <!-- 歷史紀錄面版 -->
+    <div id="history-panel" class="hidden">
+      <div class="history-header">
+        <span id="history-title">最近總結</span>
+        <div class="history-actions">
+          <button id="export-history" class="btn-icon-small" title="匯出總結 (JSON)">📥</button>
+          <button id="clear-history" class="btn-icon-small" title="清空紀錄">🗑️</button>
+          <button id="close-history" class="btn-small">✕</button>
+        </div>
+      </div>
+      <div id="history-list"></div>
+    </div>
+
+    <!-- 提示訊息區域 -->
+    <div id="message">請點擊"總結"按鈕開始總結當前頁面內容。</div>
+
+
+
+    <!-- 總結結果顯示區域 -->
+    <div id="summary"></div>
+    <!-- 統計資訊區域 -->
+    <div id="stats" class="hidden">
+      <span id="stats-text"></span>
+    </div>
+    <!-- 載入動畫區域 -->
+    <div id="loading" class="hidden">
+      <div class="spinner"></div>
+      <span id="loading-text">正在思考...</span>
+    </div>
+
+
 
     <!-- 版本號顯示 -->
     <div id="version-info">v<span id="version-number"></span></div>
