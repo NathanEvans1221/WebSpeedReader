@@ -7,9 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+- **HTML 元素多語系化 (HTML i18n)**: 將 `popup.html` 中的硬編碼文字（如「進階設定」、按鈕 title 等）也加入多語系系統，實現完整的界面多語言支援。
+- **多語系檔案拆分 (Locale Files Split)**: 將 `locales.json` 拆分為獨立的語言檔案，採用 `locales/{lang}/messages.json` 目錄結構（zh → zh_TW, en, ja, ko, fr, de, es），方便獨立維護與版本控制。
+- **多語系架構重構 (i18n Extraction)**: 將所有硬編碼於 `popup.js` 中的翻譯字串提取至獨立的 `locales.json` 檔案，方便統一維護與擴充新語言。新增 `t()` 輔助函式取代原有散布式翻譯物件。
+
 ### Added
 - **跨頁總結智慧清除**: 自動偵測當前頁面與緩存總結是否相符，若切換頁面則清空前次內容，避免資訊混淆。
-- **UI 介面重構**: 將 API Key 與模型選擇移至底部的「進階設定」折疊選單，大幅簡化主介面視覺干擾。
+- **UI 介面重構**: 將 API Key 與模型選擇整合至「進階設定」折疊選單（位於操作區下方），大幅簡化主介面視覺干擾。
 - **自定義總結指令 (Custom Prompt)**: 允許使用者自行撰寫總結規則（如「翻譯成繁中」、「解釋程式碼」、「提取關鍵字」等），大幅提升使用彈性。
 - **語音朗讀 (TTS)**: 新增朗讀按鈕，可將 AI 總結內容透過瀏覽器語音讀出，支援多語言切換與播放/暫停。
 - **自定義總結風格**: 支援簡明 (Concise)、標準 (Normal) 或詳細 (Detailed) 三種模式切換，適應不同閱讀場景。

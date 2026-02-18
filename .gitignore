@@ -12,3 +12,12 @@ modern.jsonp
 resources/sass/.sass-cache/
 resources/.arch-internal-preview.css
 .arch-internal-preview.css
+
+# Windows 系統檔案
+desktop.ini
+Thumbs.db
+
+# macOS 系統檔案
+.DS_Store
+.AppleDouble
+.LSOverride

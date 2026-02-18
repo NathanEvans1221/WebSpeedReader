@@ -1,0 +1,41 @@
+{
+    "ui": {
+        "summarize": "Resümee",
+        "copy": "Kopieren",
+        "history": "Verlauf",
+        "clear": "Leeren",
+        "message": "Klicken Sie auf \"Resümee\", um zu beginnen.",
+        "loading": "Denken...",
+        "historyTitle": "Letzte Zusammenfassungen",
+        "promptPlaceholder": "Geben Sie Ihre Anweisung ein...",
+        "copied": "Kopiert",
+        "delete": "Löschen"
+    },
+    "styles": [
+        "Normal",
+        "Prägnant",
+        "Detailliert",
+        "Benutzerdefiniert"
+    ],
+    "alerts": {
+        "alertKey": "Bitte setzen Sie zuerst den groq API Key",
+        "keySaved": "API Key gespeichert",
+        "noExportHistory": "Kein Verlauf zum Exportieren",
+        "confirmClear": "Möchten Sie wirklich den gesamten Verlauf löschen?",
+        "noHistory": "Noch kein Verlauf"
+    },
+    "errors": {
+        "summarizeError": "Ein Fehler ist während der Zusammenfassung aufgetreten"
+    },
+    "stats": {
+        "expanded": "📝 Inhalt erweitert ({original} → {summary} Zeichen)",
+        "saved": "⚡️ Gespart {percent}% des Lesens ({original} → {summary} Zeichen)"
+    },
+    "prompts": {
+        "languagePrefix": "Bitte fassen Sie den folgenden Inhalt auf Deutsch zusammen:\n\n",
+        "defaultCustom": "Please summarize the following content:\n\n",
+        "normal": "Verwenden Sie den \"Normalen Modus\" und geben Sie einen allgemeinen Überblick sowie wichtige Details.\n\n",
+        "concise": "Verwenden Sie den \"Prägnanten Modus\" und geben Sie nur 3 Kernpunkte an (mit Aufzählungszeichen).\n\n",
+        "detailed": "Verwenden Sie den \"Detaillierten Modus\" mit ausführlichem Hintergrund, Kernargumenten, spezifischen Details und Schlussfolgerungen, kategorisiert mit klaren Überschriften.\n\n"
+    }
+}

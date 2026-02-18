@@ -1,0 +1,57 @@
+{
+    "ui": {
+        "summarize": "Sum",
+        "copy": "Copy",
+        "history": "Hist",
+        "clear": "Clear",
+        "message": "Click \"Sum\" to start.",
+        "loading": "Thinking...",
+        "historyTitle": "Recent Summaries",
+        "promptPlaceholder": "Enter your custom prompt...",
+        "copied": "Copied!",
+        "delete": "Delete",
+        "advancedSettings": "⚙️ Advanced Settings",
+        "themeToggle": "Toggle Theme",
+        "customTextColor": "Custom Text Color",
+        "customBgColor": "Custom Background Color",
+        "copyMarkdown": "Copy Markdown",
+        "readAloud": "Read Aloud",
+        "exportHistory": "Export History (JSON)",
+        "clearHistory": "Clear History",
+        "save": "Save",
+        "aiModel": "AI Model:",
+        "apiKey": "API Key:",
+        "maxTokens": "Max Tokens:",
+        "maxTokensPlaceholder": "Default (e.g. 2048)",
+        "selectedContentSummary": "Selected Content Summary",
+        "selectedContent": "Selected Content",
+        "appTitle": "WebSpeedReader"
+    },
+    "styles": [
+        "Normal",
+        "Concise",
+        "Detailed",
+        "Custom Prompt"
+    ],
+    "alerts": {
+        "alertKey": "Please set groq API Key first",
+        "keySaved": "groq API Key saved",
+        "noExportHistory": "No history to export",
+        "confirmClear": "Are you sure you want to clear all history?",
+        "noHistory": "No history yet"
+    },
+    "errors": {
+        "summarizeError": "An error occurred during summarization"
+    },
+    "stats": {
+        "expanded": "📝 Content expanded ({original} → {summary} chars)",
+        "saved": "⚡️ Saved {percent}% of reading ({original} → {summary} chars)"
+    },
+    "prompts": {
+        "languagePrefix": "Please summarize the following content in English:\n\n",
+        "defaultCustom": "Please summarize the following content:\n\n",
+        "normal": "Use \"Normal Mode\", providing a general overview and important details.\n\n",
+        "concise": "Use \"Concise Mode\", providing only 3 core key points (using bullet points).\n\n",
+        "detailed": "Use \"Detailed Mode\", including detailed background, core arguments, specific details, and conclusion, categorized with clear headings.\n\n"
+    }
+}

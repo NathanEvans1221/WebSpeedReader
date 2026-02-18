@@ -2,10 +2,52 @@ let currentLanguage = 'zh'; // 預設語言為繁體中文
 let currentStyle = 'normal'; // 預設總結風格為標準摘要
 let currentModel = 'openai/gpt-oss-20b'; // 預設模型
 let summarizing = false; // 標記是否正在進行總結
+let i18n = {}; // 多語系翻譯資料
+
+// 從 _locales/{lang}/messages.json 載入多語系翻譯
+async function loadLocales() {
+  try {
+    // 語言代碼映射 (zh → zh_TW)
+    const langMap = {
+      'zh': 'zh_TW',
+      'en': 'en',
+      'ja': 'ja',
+      'ko': 'ko',
+      'fr': 'fr',
+      'de': 'de',
+      'es': 'es'
+    };
+    const localeCode = langMap[currentLanguage] || 'en';
+    const url = chrome.runtime.getURL(`locales/${localeCode}/messages.json`);
+    const response = await fetch(url);
+    const data = await response.json();
+    // 將載入的語言資料存入 i18n[currentLanguage]
+    i18n[currentLanguage] = data;
+  } catch (e) {
+    console.error('Failed to load locale file:', e);
+  }
+}
+
+// 取得翻譯文字的輔助函式
+// path 例如 'ui.summarize', 'alerts.alertKey'
+function t(path) {
+  const lang = i18n[currentLanguage] || i18n['en'] || {};
+  const fallback = i18n['en'] || {};
+  const keys = path.split('.');
+  let val = lang;
+  let fb = fallback;
+  for (const k of keys) {
+    val = val?.[k];
+    fb = fb?.[k];
+  }
+  return val ?? fb ?? path;
+}
 
 
 
-document.addEventListener('DOMContentLoaded', function () {
+document.addEventListener('DOMContentLoaded', async function () {
+  // 載入多語系翻譯
+  await loadLocales();
   // 獲取 DOM 元素
   const languageSelect = document.getElementById('language-select');
   const styleSelect = document.getElementById('style-select');
@@ -44,6 +86,12 @@ document.addEventListener('DOMContentLoaded', function () {
   const textColorPicker = document.getElementById('text-color-picker');
   const bgColorPicker = document.getElementById('bg-color-picker');
 
+  // 進階設定相關 DOM
+  const advancedSummary = document.getElementById('advanced-summary');
+  const aiModelLabel = document.querySelector('label[for="model-select"]');
+  const apiKeyLabel = document.querySelector('label[for="api-key"]');
+  const maxTokensLabel = document.querySelector('label[for="max-tokens"]');
+
   let rawSummary = ''; // 儲存原始 Markdown 文本
 
   // 顯示版本號
@@ -54,7 +102,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
   // 載入之前的狀態
   chrome.storage.local.get(['language', 'summary', 'apiKey', 'style', 'pendingSelection', 'pendingTitle', 'theme', 'model', 'textColor', 'customBgColor', 'customPrompt'], async function (result) {
-    console.warn("🔍 [Popup] Storage 載入完成:", result); // Debug Log
+    console.log("🔍 [Popup] Storage 載入完成:", JSON.stringify(result, null, 2)); // Debug Log (可選)
     // 處理字體顏色
     if (result.textColor) {
       document.documentElement.style.setProperty('--text-color', result.textColor);
@@ -119,7 +167,7 @@ document.addEventListener('DOMContentLoaded', function () {
     if (result.pendingSelection) {
       // 來自右鍵選單的內容
       const selectedText = result.pendingSelection;
-      const selectedTitle = result.pendingTitle || "選取內容總結";
+      const selectedTitle = result.pendingTitle || t('ui.selectedContentSummary');
       // 清除 pending，避免和下一次開啟衝突
       chrome.storage.local.remove(['pendingSelection', 'pendingTitle']);
       // 自動觸發總結
@@ -154,16 +202,21 @@ document.addEventListener('DOMContentLoaded', function () {
   }
 
   // API Key 輸入監聽
-  apiKeyInput.addEventListener('input', function () {
-    updateApiKeyHint(this.value);
-  });
+  if (apiKeyInput) {
+    apiKeyInput.addEventListener('input', function () {
+      updateApiKeyHint(this.value);
+    });
+  }
 
   // 語言選擇器變更事件
-  languageSelect.addEventListener('change', function () {
-    currentLanguage = this.value; // 更新當前語言
-    chrome.storage.local.set({ language: currentLanguage }); // 保存語言設定
-    updateLanguage(); // 更新語言相關的 UI 文本
-  });
+  if (languageSelect) {
+    languageSelect.addEventListener('change', async function () {
+      currentLanguage = this.value; // 更新當前語言
+      chrome.storage.local.set({ language: currentLanguage }); // 保存語言設定
+      await loadLocales(); // 重新載入對應語言檔案
+      updateLanguage(); // 更新語言相關的 UI 文本
+    });
+  }
 
   // PDF 手動上傳事件
 
@@ -201,33 +254,39 @@ document.addEventListener('DOMContentLoaded', function () {
   });
 
   // 總結按鈕點擊事件
-  summarizeBtn.addEventListener('click', summarize);
+  if (summarizeBtn) {
+    summarizeBtn.addEventListener('click', summarize);
+  }
 
   // 清除按鈕點擊事件
-  clearSummaryBtn.addEventListener('click', function () {
-    rawSummary = '';
-    summaryDiv.innerHTML = ''; // 清空總結區域
-    chrome.storage.local.remove('summary'); // 移除保存的總結
-  });
+  if (clearSummaryBtn) {
+    clearSummaryBtn.addEventListener('click', function () {
+      rawSummary = '';
+      summaryDiv.innerHTML = ''; // 清空總結區域
+      chrome.storage.local.remove('summary'); // 移除保存的總結
+    });
+  }
 
   // 複製按鈕點擊事件
-  copyBtn.addEventListener('click', function () {
-    const textToCopy = rawSummary;
-    if (!textToCopy) return;
+  if (copyBtn) {
+    copyBtn.addEventListener('click', function () {
+      const textToCopy = rawSummary;
+      if (!textToCopy) return;
 
-    navigator.clipboard.writeText(textToCopy).then(() => {
-      // 視覺反饋
-      const originalTitle = copyBtn.getAttribute('title');
-      copyBtn.setAttribute('title', currentLanguage === 'zh' ? '已複製！' : 'Copied!');
-      copyBtn.classList.add('copied');
-      setTimeout(() => {
-        copyBtn.setAttribute('title', originalTitle);
-        copyBtn.classList.remove('copied');
-      }, 2000);
-    }).catch(err => {
-      console.error('Failed to copy: ', err);
+      navigator.clipboard.writeText(textToCopy).then(() => {
+        // 視覺反饋
+        const originalTitle = copyBtn.getAttribute('title');
+        copyBtn.setAttribute('title', currentLanguage === 'zh' ? '已複製！' : 'Copied!');
+        copyBtn.classList.add('copied');
+        setTimeout(() => {
+          copyBtn.setAttribute('title', originalTitle);
+          copyBtn.classList.remove('copied');
+        }, 2000);
+      }).catch(err => {
+        console.error('Failed to copy: ', err);
+      });
     });
-  });
+  }
 
   // TTS 語音朗讀邏輯
   let isSpeaking = false;
@@ -301,196 +360,150 @@ document.addEventListener('DOMContentLoaded', function () {
   });
 
   // 歷史紀錄按鈕點擊事件
-  historyBtn.addEventListener('click', function () {
-    historyPanel.classList.toggle('hidden');
-    if (!historyPanel.classList.contains('hidden')) {
-      renderHistory();
-    }
-  });
+  if (historyBtn && historyPanel) {
+    historyBtn.addEventListener('click', function () {
+      historyPanel.classList.toggle('hidden');
+      if (!historyPanel.classList.contains('hidden')) {
+        renderHistory();
+      }
+    });
+  }
 
   // 關閉歷史紀錄
-  closeHistoryBtn.addEventListener('click', function () {
-    historyPanel.classList.add('hidden');
-  });
+  if (closeHistoryBtn && historyPanel) {
+    closeHistoryBtn.addEventListener('click', function () {
+      historyPanel.classList.add('hidden');
+    });
+  }
 
   // 字體顏色切換事件
-  textColorPicker.addEventListener('input', function () {
-    const newColor = this.value;
-    document.documentElement.style.setProperty('--text-color', newColor);
-    chrome.storage.local.set({ textColor: newColor });
-  });
+  if (textColorPicker) {
+    textColorPicker.addEventListener('input', function () {
+      const newColor = this.value;
+      document.documentElement.style.setProperty('--text-color', newColor);
+      chrome.storage.local.set({ textColor: newColor });
+    });
+  }
 
   // 背景色切換事件
-  bgColorPicker.addEventListener('input', function () {
-    const newColor = this.value;
-    document.documentElement.style.setProperty('--bg-color', newColor);
-    chrome.storage.local.set({ customBgColor: newColor });
-  });
+  if (bgColorPicker) {
+    bgColorPicker.addEventListener('input', function () {
+      const newColor = this.value;
+      document.documentElement.style.setProperty('--bg-color', newColor);
+      chrome.storage.local.set({ customBgColor: newColor });
+    });
+  }
 
   // 匯出歷史紀錄
-  exportHistoryBtn.addEventListener('click', function () {
-    chrome.storage.local.get(['history'], function (result) {
-      const history = result.history || [];
-      if (history.length === 0) {
-        const t = {
-          zh: '尚無紀錄可匯出', en: 'No history to export', ja: 'エクスポートする履歴がありません',
-          ko: '내보낼 기록이 없습니다', fr: 'Aucun historique à exporter', de: 'Kein Verlauf zum Exportieren', es: 'No hay historial para exportar'
-        };
-        alert(t[currentLanguage] || t.en);
-        return;
-      }
-      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(history, null, 2));
-      const downloadAnchorNode = document.createElement('a');
-      downloadAnchorNode.setAttribute("href", dataStr);
-      downloadAnchorNode.setAttribute("download", `webspeedreader_history_${new Date().getTime()}.json`);
-      document.body.appendChild(downloadAnchorNode);
-      downloadAnchorNode.click();
-      downloadAnchorNode.remove();
+  if (exportHistoryBtn) {
+    exportHistoryBtn.addEventListener('click', function () {
+      chrome.storage.local.get(['history'], function (result) {
+        const history = result.history || [];
+        if (history.length === 0) {
+          alert(t('alerts.noExportHistory'));
+          return;
+        }
+        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(history, null, 2));
+        const downloadAnchorNode = document.createElement('a');
+        downloadAnchorNode.setAttribute("href", dataStr);
+        downloadAnchorNode.setAttribute("download", `webspeedreader_history_${new Date().getTime()}.json`);
+        document.body.appendChild(downloadAnchorNode);
+        downloadAnchorNode.click();
+        downloadAnchorNode.remove();
+      });
     });
-  });
+  }
 
   // 清空歷史紀錄
-  clearHistoryBtn.addEventListener('click', function () {
-    const t = {
-      zh: '確定要清空所有歷史紀錄嗎？', en: 'Are you sure you want to clear all history?',
-      ja: '履歴をすべて消去してもよろしいですか？', ko: '모든 기록을 정말 지우시겠습니까?',
-      fr: 'Êtes-vous sûr de vouloir effacer tout l\'historique ?', de: 'Möchten Sie wirklich den gesamten Verlauf löschen?',
-      es: '¿Seguro que quieres borrar todo el historial?'
-    };
-    const confirmMsg = t[currentLanguage] || t.en;
-    if (confirm(confirmMsg)) {
-      chrome.storage.local.set({ history: [] }, function () {
-        renderHistory();
-      });
-    }
-  });
+  if (clearHistoryBtn) {
+    clearHistoryBtn.addEventListener('click', function () {
+      if (confirm(t('alerts.confirmClear'))) {
+        chrome.storage.local.set({ history: [] }, function () {
+          renderHistory();
+        });
+      }
+    });
+  }
 
   // 主題切換事件
-  themeToggle.addEventListener('click', function () {
-    const currentTheme = document.documentElement.getAttribute('data-theme');
-    const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-    document.documentElement.setAttribute('data-theme', newTheme);
-    chrome.storage.local.set({ theme: newTheme });
+  if (themeToggle) {
+    themeToggle.addEventListener('click', function () {
+      const currentTheme = document.documentElement.getAttribute('data-theme');
+      const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', newTheme);
+      chrome.storage.local.set({ theme: newTheme });
 
-    // 切換主題時，重置所有自定義顏色，以免混淆
-    chrome.storage.local.remove(['textColor', 'customBgColor', 'accentColor']);
-    document.documentElement.style.removeProperty('--text-color');
-    document.documentElement.style.removeProperty('--bg-color');
-    document.documentElement.style.removeProperty('--accent-color');
+      // 切換主題時，重置所有自定義顏色，以免混淆
+      chrome.storage.local.remove(['textColor', 'customBgColor', 'accentColor']);
+      document.documentElement.style.removeProperty('--text-color');
+      document.documentElement.style.removeProperty('--bg-color');
+      document.documentElement.style.removeProperty('--accent-color');
 
-    // 重置選擇器的顯示值
-    textColorPicker.value = newTheme === 'dark' ? '#e0e0e0' : '#333333';
-    bgColorPicker.value = newTheme === 'dark' ? '#1e1e1e' : '#ffffff';
-  });
+      // 重置選擇器的顯示值
+      if (textColorPicker) textColorPicker.value = newTheme === 'dark' ? '#e0e0e0' : '#333333';
+      if (bgColorPicker) bgColorPicker.value = newTheme === 'dark' ? '#1e1e1e' : '#ffffff';
+    });
+  }
 
   // 保存 groq API Key 按鈕點擊事件
-  saveApiKeyBtn.addEventListener('click', function () {
-    const apiKey = apiKeyInput.value.trim(); // 獲取並修剪 groq API Key
-    if (apiKey) {
-      chrome.storage.local.set({ apiKey: apiKey }); // 保存 groq API Key
-      const t = {
-        zh: 'groq API Key 已保存', en: 'groq API Key saved', ja: 'APIキーが保存されました',
-        ko: 'API 키 저장됨', fr: 'Clé API enregistrée', de: 'API Key gespeichert', es: 'Clave API guardada'
-      };
-      alert(t[currentLanguage] || t.en); // 顯示保存成功訊息
-    }
-  });
+  if (saveApiKeyBtn && apiKeyInput) {
+    saveApiKeyBtn.addEventListener('click', function () {
+      const apiKey = apiKeyInput.value.trim(); // 獲取並修剪 groq API Key
+      if (apiKey) {
+        chrome.storage.local.set({ apiKey: apiKey }); // 保存 groq API Key
+        alert(t('alerts.keySaved')); // 顯示保存成功訊息
+      }
+    });
+  }
 
   // 更新語言相關的 UI 文本
   function updateLanguage() {
-    const texts = {
-      zh: {
-        summarize: '總結', copy: '複製', history: '歷史', clear: '清除',
-        message: '請點擊"總結"按鈕開始總結當前頁面內容。',
-        loading: '正在思考...', historyTitle: '最近總結',
-        styles: ['標準摘要', '簡明模式', '深度解析', '自定義指令'],
-        promptPlaceholder: '請輸入您的總結指令 (Prompt)...',
-        alertKey: '請先設置 groq API Key', keySaved: 'groq API Key 已保存',
-        error: '總結時發生錯誤', noHistory: '尚無歷史紀錄', confirmClear: '確定要清空所有歷史紀錄嗎？',
-        copied: '已複製', delete: '刪除', expanded: '內容擴展了', saved: '節省了', reading: '的閱讀量'
-      },
-      en: {
-        summarize: 'Sum', copy: 'Copy', history: 'Hist', clear: 'Clear',
-        message: 'Click "Sum" to start.',
-        loading: 'Thinking...', historyTitle: 'Recent Summaries',
-        styles: ['Normal', 'Concise', 'Detailed', 'Custom Prompt'],
-        promptPlaceholder: 'Enter your custom prompt...',
-        alertKey: 'Please set groq API Key first', keySaved: 'groq API Key saved',
-        error: 'Error occurred', noHistory: 'No history', confirmClear: 'Clear all history?',
-        copied: 'Copied', delete: 'Delete', expanded: 'Content expanded', saved: 'Saved', reading: 'of reading'
-      },
-      ja: {
-        summarize: '要約', copy: '複製', history: '履歴', clear: '消去',
-        message: '「要約」ボタンをクリックして開始します。',
-        loading: '思考中...', historyTitle: '最近の要約',
-        styles: ['標準', '簡潔', '詳細', 'カスタム指令'],
-        promptPlaceholder: '要約の指示を入力してください...',
-        alertKey: 'groq APIキーを設定してください', keySaved: 'APIキーが保存されました',
-        error: 'エラーが発生しました', noHistory: '履歴なし', confirmClear: '履歴をすべて消去しますか？',
-        copied: '複製完了', delete: '削除', expanded: '内容が拡張されました', saved: '読書量を', reading: '節約しました'
-      },
-      ko: {
-        summarize: '요약', copy: '복사', history: '기록', clear: '지우기',
-        message: '시작하려면 "요약" 버튼을 클릭하세요.',
-        loading: '생각 중...', historyTitle: '최근 요약',
-        styles: ['표준', '간결', '상세', '사용자 정의'],
-        promptPlaceholder: '요약 지침을 입력하세요...',
-        alertKey: 'groq API 키를 먼저 설정하세요', keySaved: 'API 키 저장됨',
-        error: '오류가 발생했습니다', noHistory: '기록 없음', confirmClear: '모든 기록을 지우시겠습니까?',
-        copied: '복사됨', delete: '삭제', expanded: '내용이 확장되었습니다', saved: '절약됨', reading: '독서량'
-      },
-      fr: {
-        summarize: 'Résumer', copy: 'Copier', history: 'Hist.', clear: 'Effacer',
-        message: 'Cliquez sur "Résumer" pour commencer.',
-        loading: 'Penser...', historyTitle: 'Résumés récents',
-        styles: ['Normal', 'Concis', 'Détaillé', 'Personnalisé'],
-        promptPlaceholder: 'Entrez votre instruction...',
-        alertKey: 'Veuillez définir la clé API groq', keySaved: 'Clé API enregistrée',
-        error: 'Une erreur est survenue', noHistory: 'Aucun historique', confirmClear: 'Effacer tout l\'historique ?',
-        copied: 'Copié', delete: 'Supprimer', expanded: 'Contenu étendu', saved: 'Économisé', reading: 'de lecture'
-      },
-      de: {
-        summarize: 'Resümee', copy: 'Kopieren', history: 'Verlauf', clear: 'Leeren',
-        message: 'Klicken Sie auf "Resümee", um zu beginnen.',
-        loading: 'Denken...', historyTitle: 'Letzte Zusammenfassungen',
-        styles: ['Normal', 'Prägnant', 'Detailliert', 'Benutzerdefiniert'],
-        promptPlaceholder: 'Geben Sie Ihre Anweisung ein...',
-        alertKey: 'Bitte setzen Sie zuerst den groq API Key', keySaved: 'API Key gespeichert',
-        error: 'Ein Fehler ist aufgetreten', noHistory: 'Kein Verlauf', confirmClear: 'Verlauf leeren?',
-        copied: 'Kopiert', delete: 'Löschen', expanded: 'Inhalt erweitert', saved: 'Gespart', reading: 'des Lesens'
-      },
-      es: {
-        summarize: 'Resumir', copy: 'Copiar', history: 'Hist.', clear: 'Borrar',
-        message: 'Haga clic en "Resumir" para comenzar.',
-        loading: 'Pensando...', historyTitle: 'Resúmenes recientes',
-        styles: ['Normal', 'Conciso', 'Detallado', 'Personalizado'],
-        promptPlaceholder: 'Introduzca su instrucción...',
-        alertKey: 'Configure primero la clave API groq', keySaved: 'Clave API guardada',
-        error: 'Ocurrió un error', noHistory: 'Sin historial', confirmClear: '¿Borrar todo el historial?',
-        copied: 'Copiado', delete: 'Borrar', expanded: 'Contenido expandido', saved: 'Ahorrado', reading: 'de lectura'
-      }
-    };
+    const styles = t('styles');
 
-    const t = texts[currentLanguage] || texts.en;
+    // 設定頁面標題
+    document.title = t('ui.appTitle');
 
-    summarizeBtn.textContent = t.summarize;
-    copyBtn.textContent = t.copy;
-    historyBtn.textContent = t.history;
-    clearSummaryBtn.textContent = t.clear;
-    messageDiv.textContent = t.message;
-    loadingText.textContent = t.loading;
-    historyTitle.textContent = t.historyTitle;
+    // 按鈕文字
+    if (summarizeBtn) summarizeBtn.textContent = t('ui.summarize');
+    if (historyBtn) historyBtn.textContent = t('ui.history');
+    if (clearSummaryBtn) clearSummaryBtn.textContent = t('ui.clear');
+    if (saveApiKeyBtn) saveApiKeyBtn.textContent = t('ui.save');
+    if (messageDiv) messageDiv.textContent = t('ui.message');
+    if (loadingText) loadingText.textContent = t('ui.loading');
+    if (historyTitle) historyTitle.textContent = t('ui.historyTitle');
 
-    loadingText.textContent = t.loading;
-    historyTitle.textContent = t.historyTitle;
+    // Title 屬性
+    if (themeToggle) themeToggle.setAttribute('title', t('ui.themeToggle'));
+    if (textColorPicker) textColorPicker.setAttribute('title', t('ui.customTextColor'));
+    if (bgColorPicker) bgColorPicker.setAttribute('title', t('ui.customBgColor'));
+    if (copyBtn) copyBtn.setAttribute('title', t('ui.copyMarkdown'));
+    if (ttsBtn) ttsBtn.setAttribute('title', t('ui.readAloud'));
+    if (exportHistoryBtn) exportHistoryBtn.setAttribute('title', t('ui.exportHistory'));
+    if (clearHistoryBtn) clearHistoryBtn.setAttribute('title', t('ui.clearHistory'));
 
-    styleSelect.options[0].text = t.styles[0];
-    styleSelect.options[1].text = t.styles[1];
-    styleSelect.options[2].text = t.styles[2];
-    styleSelect.options[3].text = t.styles[3];
-    customPromptInput.placeholder = t.promptPlaceholder;
+    // 進階設定
+    if (advancedSummary) {
+      advancedSummary.textContent = t('ui.advancedSettings');
+    }
+    if (aiModelLabel) {
+      aiModelLabel.textContent = t('ui.aiModel');
+    }
+    if (apiKeyLabel) {
+      apiKeyLabel.textContent = t('ui.apiKey');
+    }
+    if (maxTokensLabel) {
+      maxTokensLabel.textContent = t('ui.maxTokens');
+    }
 
-    // 更新 Placeholder (如果有的話)
+    // Placeholder
+    if (styleSelect && Array.isArray(styles) && styles.length >= 4) {
+      styleSelect.options[0].text = styles[0];
+      styleSelect.options[1].text = styles[1];
+      styleSelect.options[2].text = styles[2];
+      styleSelect.options[3].text = styles[3];
+    }
+    customPromptInput.placeholder = t('ui.promptPlaceholder');
+    maxTokensInput.placeholder = t('ui.maxTokensPlaceholder');
     apiKeyInput.placeholder = 'Groq API Key';
   }
 
@@ -510,7 +523,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
       if (forcedContent) {
         pageContent = forcedContent;
-        tabTitle = forcedTitle || "選取內容";
+        tabTitle = forcedTitle || t('ui.selectedContent');
         tabUrl = ""; // 選取內容可能無 URL 或不重要
       } else {
         const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
@@ -551,13 +564,7 @@ document.addEventListener('DOMContentLoaded', function () {
       });
 
       if (!apiKey) {
-        const t = {
-          zh: '請先設置 groq API Key', en: 'Please set the groq API Key first',
-          ja: '最初にgroq APIキーを設定してください', ko: '먼저 groq API 키를 설정하세요',
-          fr: 'Veuillez d\'abord définir la clé API groq', de: 'Bitte setzen Sie zuerst den groq API Key',
-          es: 'Por favor, configure primero la clave API groq'
-        };
-        alert(t[currentLanguage] || t.en); // 提示設置 groq API Key
+        alert(t('alerts.alertKey')); // 提示設置 groq API Key
         summarizing = false; // 重置總結狀態
         summarizeBtn.disabled = false; // 啟用總結按鈕
         return;
@@ -574,62 +581,15 @@ document.addEventListener('DOMContentLoaded', function () {
           prompt = userCustomPrompt + "\n\n";
         } else {
           // 如果使用者沒輸入，給一個預設的通用提示
-          prompt = (currentLanguage === 'zh')
-            ? "請總結以下內容：\n\n"
-            : "Please summarize the following content:\n\n";
+          prompt = t('prompts.defaultCustom');
         }
       } else {
         // 標準模式 (Concise, Normal, Detailed)
-        if (currentLanguage === 'zh') {
-          prompt = `請用繁體中文總結以下內容：\n\n`;
-        } else if (currentLanguage === 'ja') {
-          prompt = `以下の内容を日本語で要約してください：\n\n`;
-        } else if (currentLanguage === 'ko') {
-          prompt = `다음 내용을 한국어로 요약해 주세요:\n\n`;
-        } else if (currentLanguage === 'fr') {
-          prompt = `Veuillez résumer le contenu suivant en français :\n\n`;
-        } else if (currentLanguage === 'de') {
-          prompt = `Bitte fassen Sie den folgenden Inhalt auf Deutsch zusammen:\n\n`;
-        } else if (currentLanguage === 'es') {
-          prompt = `Por favor, resuma el siguiente contenido en español:\n\n`;
-        } else {
-          prompt = `Please summarize the following content in English:\n\n`;
-        }
+        prompt = t('prompts.languagePrefix');
 
-        const stylePrompts = {
-          concise: {
-            zh: `請以「簡明模式」總結，只提供 3 個核心重點（使用 bullet points）。\n\n`,
-            en: `Use "Concise Mode", providing only 3 core key points (using bullet points).\n\n`,
-            ja: `「簡潔モード」を使用し、3つの重要なポイントのみを箇条書きで提供してください。\n\n`,
-            ko: `핵심 포인트 3개만 글머리 기호를 사용하여 "간결 모드"로 요약해 주세요.\n\n`,
-            fr: `Utilisez le "Mode Concis", en fournissant seulement 3 points clés (avec des puces).\n\n`,
-            de: `Verwenden Sie den "Prägnanten Modus" und geben Sie nur 3 Kernpunkte an (mit Aufzählungszeichen).\n\n`,
-            es: `Use el "Modo Conciso", proporcionando solo 3 puntos clave (con viñetas).\n\n`
-          },
-          detailed: {
-            zh: `請以「深度解析」模式總結，包含詳細的背景、核心觀點、具體細節與結論，並使用適當的標題。\n\n`,
-            en: `Use "Detailed Mode", including detailed background, core arguments, specific details, and conclusion, categorized with clear headings.\n\n`,
-            ja: `「詳細モード」を使用し、詳細な背景、核心的な議論、具体的な詳細、結論を含め、明確な見出しで分類してください。\n\n`,
-            ko: `상세한 배경, 핵심 주장이 포함된 "상세 모드"를 사용하여 적절한 제목과 함께 요약해 주세요.\n\n`,
-            fr: `Utilisez le "Mode Détaillé", incluant le contexte détaillé, les arguments principaux, les détails spécifiques et la conclusion, avec des titres clairs.\n\n`,
-            de: `Verwenden Sie den "Detaillierten Modus" mit ausführlichem Hintergrund, Kernargumenten, spezifischen Details und Schlussfolgerungen, kategorisiert mit klaren Überschriften.\n\n`,
-            es: `Use el "Modo Detallado", incluyendo antecedentes detallados, argumentos centrales, detalles específicos y conclusiones, con encabezados claros.\n\n`
-          },
-          normal: {
-            zh: `請以「標準摘要」模式總結，提供整體的概要與重要細節。\n\n`,
-            en: `Use "Normal Mode", providing a general overview and important details.\n\n`,
-            ja: `「標準モード」を使用し、全体的な概要と重要な詳細を提供してください。\n\n`,
-            ko: `전체적인 개요와 중요한 세부 사항을 포함하여 "표준 모드"로 요약해 주세요.\n\n`,
-            fr: `Utilisez le "Mode Normal", en fournissant un aperçu général et des détails importants.\n\n`,
-            de: `Verwenden Sie den "Normalen Modus" und geben Sie einen allgemeinen Überblick sowie wichtige Details.\n\n`,
-            es: `Use el "Modo Normal", proporcionando una visión general y detalles importantes.\n\n`
-          }
-        };
-
-        const langKey = (['zh', 'en', 'ja', 'ko', 'fr', 'de', 'es'].includes(currentLanguage)) ? currentLanguage : 'en';
-        // 這裡要判斷 stylePrompts[currentStyle] 是否存在，避免 custom 在這一步出錯 (雖然有上面的 if 擋著，但保險起見還是加上 || normal)
-        const styleData = stylePrompts[currentStyle] || stylePrompts['normal'];
-        prompt += styleData[langKey] || styleData['en'];
+        // 取得對應風格的 prompt
+        const styleKey = ['concise', 'detailed', 'normal'].includes(currentStyle) ? currentStyle : 'normal';
+        prompt += t(`prompts.${styleKey}`);
       }
 
       prompt += pageContent;
@@ -696,26 +656,15 @@ document.addEventListener('DOMContentLoaded', function () {
       if (originalLen > 0) {
         if (summaryLen > originalLen) {
           // 內容反而變多了
-          if (currentLanguage === 'zh') {
-            statsText.textContent = `📝 內容擴展了 (原 ${originalLen} → 現 ${summaryLen} 字)`;
-          } else if (currentLanguage === 'ja') {
-            statsText.textContent = `📝 内容が拡張されました (元 ${originalLen} → 現 ${summaryLen} 文字)`;
-          } else if (currentLanguage === 'ko') {
-            statsText.textContent = `📝 내용이 확장되었습니다 (원문 ${originalLen} → 요약 ${summaryLen} 자)`;
-          } else {
-            statsText.textContent = `📝 Content expanded (${originalLen} → ${summaryLen} chars)`;
-          }
+          statsText.textContent = t('stats.expanded')
+            .replace('{original}', originalLen)
+            .replace('{summary}', summaryLen);
         } else {
           const savedPercent = Math.round(((originalLen - summaryLen) / originalLen) * 100);
-          if (currentLanguage === 'zh') {
-            statsText.textContent = `⚡️ 節省了 ${savedPercent}% 的閱讀量 (${originalLen} → ${summaryLen} 字)`;
-          } else if (currentLanguage === 'ja') {
-            statsText.textContent = `⚡️ 読書量を ${savedPercent}% 節約しました (${originalLen} → ${summaryLen} 文字)`;
-          } else if (currentLanguage === 'ko') {
-            statsText.textContent = `⚡️ 독서량 ${savedPercent}% 절약됨 (${originalLen} → ${summaryLen} 자)`;
-          } else {
-            statsText.textContent = `⚡️ Saved ${savedPercent}% of reading (${originalLen} → ${summaryLen} chars)`;
-          }
+          statsText.textContent = t('stats.saved')
+            .replace('{percent}', savedPercent)
+            .replace('{original}', originalLen)
+            .replace('{summary}', summaryLen);
         }
         statsDiv.classList.remove('hidden');
       }
@@ -731,13 +680,7 @@ document.addEventListener('DOMContentLoaded', function () {
       saveToHistory(rawSummary, tabTitle, tabUrl);
     } catch (error) {
       console.error('Error:', error);
-      const t = {
-        zh: '總結時發生錯誤', en: 'An error occurred during summarization',
-        ja: '要約中にエラーが発生しました', ko: '요약 중 오류가 발생했습니다',
-        fr: 'Une erreur est survenue lors du résumé', de: 'Ein Fehler ist während der Zusammenfassung aufgetreten',
-        es: 'Ocurrió un error durante el resumen'
-      };
-      summaryDiv.textContent = t[currentLanguage] || t.en; // 顯示錯誤訊息
+      summaryDiv.textContent = t('errors.summarizeError'); // 顯示錯誤訊息
     } finally {
       summarizing = false; // 重置總結狀態
       summarizeBtn.disabled = false; // 啟用總結按鈕
@@ -772,11 +715,7 @@ document.addEventListener('DOMContentLoaded', function () {
       const history = result.history || [];
       historyList.innerHTML = '';
       if (history.length === 0) {
-        const t = {
-          zh: '尚無歷史紀錄', en: 'No history yet', ja: '履歴はまだありません',
-          ko: '기록이 없습니다', fr: 'Pas encore d\'historique', de: 'Noch kein Verlauf', es: 'Todavía no hay historial'
-        };
-        historyList.innerHTML = `<div style="padding: 20px; text-align: center; color: #999; font-size: 12px;">${t[currentLanguage] || t.en}</div>`;
+        historyList.innerHTML = `<div style="padding: 20px; text-align: center; color: #999; font-size: 12px;">${t('alerts.noHistory')}</div>`;
         return;
       }
 
@@ -791,7 +730,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 <span>${item.date}</span>
               </div>
             </div>
-            <button class="delete-item-btn" data-index="${index}" title="${currentLanguage === 'zh' ? '刪除' : (currentLanguage === 'ja' ? '削除' : 'Delete')}" style="background:none; border:none; padding: 4px; cursor: pointer; opacity: 0.5;">✕</button>
+            <button class="delete-item-btn" data-index="${index}" title="${t('ui.delete')}" style="background:none; border:none; padding: 4px; cursor: pointer; opacity: 0.5;">✕</button>
           </div>
         `;
 

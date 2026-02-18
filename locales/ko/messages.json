@@ -1,0 +1,41 @@
+{
+    "ui": {
+        "summarize": "요약",
+        "copy": "복사",
+        "history": "기록",
+        "clear": "지우기",
+        "message": "시작하려면 \"요약\" 버튼을 클릭하세요.",
+        "loading": "생각 중...",
+        "historyTitle": "최근 요약",
+        "promptPlaceholder": "요약 지침을 입력하세요...",
+        "copied": "복사됨",
+        "delete": "삭제"
+    },
+    "styles": [
+        "표준",
+        "간결",
+        "상세",
+        "사용자 정의"
+    ],
+    "alerts": {
+        "alertKey": "groq API 키를 먼저 설정하세요",
+        "keySaved": "API 키 저장됨",
+        "noExportHistory": "내보낼 기록이 없습니다",
+        "confirmClear": "모든 기록을 정말 지우시겠습니까?",
+        "noHistory": "기록이 없습니다"
+    },
+    "errors": {
+        "summarizeError": "요약 중 오류가 발생했습니다"
+    },
+    "stats": {
+        "expanded": "📝 내용이 확장되었습니다 (원문 {original} → 요약 {summary} 자)",
+        "saved": "⚡️ 독서량 {percent}% 절약됨 ({original} → {summary} 자)"
+    },
+    "prompts": {
+        "languagePrefix": "다음 내용을 한국어로 요약해 주세요:\n\n",
+        "defaultCustom": "Please summarize the following content:\n\n",
+        "normal": "전체적인 개요와 중요한 세부 사항을 포함하여 \"표준 모드\"로 요약해 주세요.\n\n",
+        "concise": "핵심 포인트 3개만 글머리 기호를 사용하여 \"간결 모드\"로 요약해 주세요.\n\n",
+        "detailed": "상세한 배경, 핵심 주장이 포함된 \"상세 모드\"를 사용하여 적절한 제목과 함께 요약해 주세요.\n\n"
+    }
+}
