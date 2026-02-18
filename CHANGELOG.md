@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **多語系架構重構 (i18n Extraction)**: 將所有硬編碼於 `popup.js` 中的翻譯字串提取至獨立的 `locales.json` 檔案，方便統一維護與擴充新語言。新增 `t()` 輔助函式取代原有散布式翻譯物件。
 
 ### Added
+- **文件更新 (Docs Update)**: 新增 Windows 環境下 `desktop.ini` 導致擴充功能載入失敗的警告至 README。
 - **跨頁總結智慧清除**: 自動偵測當前頁面與緩存總結是否相符，若切換頁面則清空前次內容，避免資訊混淆。
 - **UI 介面重構**: 將 API Key 與模型選擇整合至「進階設定」折疊選單（位於操作區下方），大幅簡化主介面視覺干擾。
 - **自定義總結指令 (Custom Prompt)**: 允許使用者自行撰寫總結規則（如「翻譯成繁中」、「解釋程式碼」、「提取關鍵字」等），大幅提升使用彈性。
